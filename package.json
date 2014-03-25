@@ -4,12 +4,15 @@
         "email": "golyshev.dmitry@yandex.ru"
     },
     "bugs": {
-        "url": "https://github.com/golyshevd/module/issues"
+        "url": "https://github.com/golyshevd/express-vs-fist/issues"
     },
     "contributors": [
         "Golyshev Dmitrii <golyshev.dmitry@yandex.ru>"
     ],
-    "dependencies": {},
+    "dependencies": {
+        "express": "3.5.x",
+        "fist": "0.0.x"
+    },
     "description": "",
     "devDependencies": {
         "jscs": "",
@@ -19,11 +22,10 @@
         "glob": ""
     },
     "license": "MIT",
-    "main": "",
-    "name": "",
+    "name": "express-vs-fist",
     "repository": {
         "type": "git",
-        "url": "git://github.com/golyshevd/module.git"
+        "url": "git://github.com/golyshevd/express-vs-fist.git"
     },
     "scripts": {
         "jscs": "jscs .",
