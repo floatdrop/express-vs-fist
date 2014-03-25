@@ -4,7 +4,7 @@
         "email": "golyshev.dmitry@yandex.ru"
     },
     "bugs": {
-        "url": "https://github.com/golyshevd/express-vs-fist/issues"
+        "url": "https://github.com/fistlabs/express-vs-fist/issues"
     },
     "contributors": [
         "Golyshev Dmitrii <golyshev.dmitry@yandex.ru>"
@@ -25,7 +25,7 @@
     "name": "express-vs-fist",
     "repository": {
         "type": "git",
-        "url": "git://github.com/golyshevd/express-vs-fist.git"
+        "url": "git://github.com/fistlabs/express-vs-fist.git"
     },
     "scripts": {
         "jscs": "jscs .",
