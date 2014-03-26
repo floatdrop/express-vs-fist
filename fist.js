@@ -73,6 +73,6 @@ app.decl('robots', function (track) {
 //  настройка роутера
 app.route('GET', '/robots.txt', 'robots');
 app.route('GET', '/news/', 'newsPage');
-app.route('GET', '/profile/', 'userProfilePage');
+app.route('GET', '/profile/', 'profilePage');
 
 app.listen(1337);
