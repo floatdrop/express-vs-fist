@@ -75,6 +75,29 @@ function news (rq, rs, next) {
     rs.send(403);
 }
 
+function ads (rq, rs, next) {
+    backend.ads(function (err, res) {
+        rq.ads = res;
+        next();
+    });
+}
+
+function sessidAndAds (rq, rs, next) {
+
+    var remaining = 2;
+
+    function done () {
+        remaining -= 1;
+
+        if ( 0 === remaining ) {
+            next();
+        }
+    }
+
+    ads(rq, rs, done);
+    sessid(rq, rs, done);
+}
+
 //  robots.txt
 app.get('/robots.txt', function (rq, rs) {
     rs.type('text');
@@ -85,10 +108,16 @@ app.get('/robots.txt', function (rq, rs) {
 });
 
 //  страница новостей
-app.get('/news/', cookieParser, sessid, auth, status, news, function (rq, rs) {
+app.get('/news/',
+    cookieParser,
+    sessidAndAds,
+    auth,
+    status,
+    news, function (rq, rs) {
     rs.send({
         sessid: rq.sessid,
-        news: rq.news
+        news: rq.news,
+        ads: rq.ads
     });
 });
 

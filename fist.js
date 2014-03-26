@@ -5,6 +5,10 @@ var Fist = require('fist/Framework');
 var app = new Fist();
 var backend = require('./lib/backend');
 
+app.decl('ads', function (track, errors, result, done) {
+    backend.ads(done);
+});
+
 //  Узел авторизации
 app.decl('sessid', function (track, errors, result, done) {
     backend.sessid(track.cookie('sessid'), done);
@@ -52,12 +56,12 @@ app.decl('news', ['status'], function (track, errors, result, done) {
 app.decl('profilePage', [
     'status', 'messages', 'sessid'
 ], function (track, errors, result) {
-        track.send(result);
+    track.send(result);
 });
 
 //  Отображает страницу новостей
 app.decl('newsPage', [
-    'news', 'sessid'
+    'news', 'sessid', 'ads'
 ], function (track, errors, result) {
     track.send(result);
 });
