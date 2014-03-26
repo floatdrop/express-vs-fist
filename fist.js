@@ -5,6 +5,7 @@ var Fist = require('fist/Framework');
 var app = new Fist();
 var backend = require('./lib/backend');
 
+//  рекламный блок
 app.decl('ads', function (track, errors, result, done) {
     backend.ads(done);
 });
@@ -33,35 +34,28 @@ app.decl('status', [
     backend.status(result.sessid.id, done);
 });
 
-//  Узел списка сообщений пользователя
-app.decl('messages', [
+//  Узел списка дел пользователя
+app.decl('todos', [
     'auth', 'sessid'
 ], function (track, errors, result, done) {
-    backend.messages(result.sessid.id, done);
+    backend.todo(result.sessid.id, done);
 });
 
-//  Узел ленты новостей, новости может видеть не каждый
-app.decl('news', ['status'], function (track, errors, result, done) {
-
-    if ( result.status.canReadNews ) {
-        backend.news(done);
-
-        return;
-    }
-
-    track.send(403);
+//  Узел списка пользователей
+app.decl('users', function (track, errors, result, done) {
+    backend.users(done);
 });
 
-//  Отображает страницу профиля
-app.decl('profilePage', [
-    'status', 'messages', 'sessid'
+//  Отображает страницу дел пользователя
+app.decl('todoPage', [
+    'status', 'todos', 'sessid'
 ], function (track, errors, result) {
     track.send(result);
 });
 
-//  Отображает страницу новостей
-app.decl('newsPage', [
-    'news', 'sessid', 'ads'
+//  Отображает страницу пользователей
+app.decl('usersPage', [
+    'users', 'sessid', 'ads'
 ], function (track, errors, result) {
     track.send(result);
 });
@@ -76,7 +70,7 @@ app.decl('robots', function (track) {
 
 //  настройка роутера
 app.route('GET', '/robots.txt', 'robots');
-app.route('GET', '/news/', 'newsPage');
-app.route('GET', '/profile/', 'profilePage');
+app.route('GET', '/', 'usersPage');
+app.route('GET', '/todo/', 'todoPage');
 
 app.listen(1337);
