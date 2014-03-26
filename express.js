@@ -15,17 +15,6 @@ function sessid (rq, rs, next) {
     });
 }
 
-//  обязательная авторизация (не работает без sessid)
-function auth (rq, rs, next) {
-
-    if ( !rq.sessid ) {
-        rs.send(403);
-
-        return;
-    }
-
-    next();
-}
 
 //  status (не работает без sessid)
 function status (rq, rs, next) {
@@ -41,6 +30,37 @@ function todos (rq, res, next) {
         rq.todos = res;
         next();
     });
+}
+
+// страница профиля
+app.get('/todo/',
+    cookies,
+    sessid,
+    status, todos,
+//    statusTodos,
+    function (rq, rs) {
+        rs.send({
+            sessid: rq.sessid,
+            status: rq.status,
+            todos: rq.todos
+        });
+    });
+
+//  параллельно вызывает status и todos
+function statusTodos (rq, rs, next) {
+
+    var remaining = 2;
+
+    function done () {
+        remaining -= 1;
+
+        if ( 0 === remaining ) {
+            next();
+        }
+    }
+
+    status(rq, rs, done);
+    todos(rq, rs, done);
 }
 
 //  Список пользователей
@@ -70,8 +90,8 @@ app.get('/robots.txt', function (rq, rs) {
 
 //  Главная страница (список пользователей)
 app.get('/',
-    //  cookies, ads, users
-    cookiesAdsUsers,
+      cookies, ads, users,
+//    cookiesAdsUsers,
     sessid,
     function (rq, rs) {
     rs.send({
@@ -97,38 +117,6 @@ function cookiesAdsUsers (rq, rs, next) {
     cookies(rq, rs, done);
     ads(rq, rs, done);
     users(rq, rs, done);
-}
-
-// страница профиля
-app.get('/todo/',
-    cookies,
-    sessid,
-    auth,
-//    status, todos,
-    statusTodos,
-    function (rq, rs) {
-        rs.send({
-            sessid: rq.sessid,
-            status: rq.status,
-            todos: rq.todos
-        });
-    });
-
-//  параллельно вызывает status и todos
-function statusTodos (rq, rs, next) {
-
-    var remaining = 2;
-
-    function done () {
-        remaining -= 1;
-
-        if ( 0 === remaining ) {
-            next();
-        }
-    }
-
-    status(rq, rs, done);
-    todos(rq, rs, done);
 }
 
 app.listen(1338);
