@@ -16,9 +16,7 @@ app.decl('todoPage', [
 
 //  Узел статуса пользователя
 app.decl('status', ['sessid'], function (track, errors, result, done) {
-    backend.status(result.sessid.id, function(err, rest) {
-        done()
-    });
+    backend.status(result.sessid.id, done);
 });
 
 //  Узел списка дел пользователя
