@@ -1,122 +1,73 @@
-'use strict';
-
-var Express = require('express');
-
-var app = Express();
+var express = require('express');
+var app = express();
 var backend = require('./lib/backend');
+var async = require('async');
+var cookies = express.cookieParser();
 
-var cookies = Express.cookieParser();
-
-//  авторизация (не работает без cookies)
-function sessid (rq, rs, next) {
+function sessid(rq, rs, next) {
     backend.sessid(rq.cookies.sessid, function (err, res) {
         rq.sessid = res;
         next();
     });
 }
 
-
-//  status (не работает без sessid)
-function status (rq, rs, next) {
+function status(rq, rs, next) {
     backend.status(rq.sessid.id, function (err, res) {
         rq.status = res;
         next();
     });
 }
 
-//  дела пользователя (не работает без sessid)
-function todos (rq, res, next) {
+function todos(rq, res, next) {
     backend.todo(rq.sessid.id, function (err, res) {
         rq.todos = res;
         next();
     });
 }
 
-// страница профиля
-app.get('/todo/',
-    cookies,
-    sessid,
-    status, todos,
-//    statusTodos,
-    function (rq, rs) {
-        rs.send({
-            sessid: rq.sessid,
-            status: rq.status,
-            todos: rq.todos
-        });
-    });
-
-//  параллельно вызывает status и todos
-function statusTodos (rq, rs, next) {
-
-    var remaining = 2;
-
-    function done () {
-        remaining -= 1;
-
-        if ( 0 === remaining ) {
-            next();
-        }
-    }
-
-    status(rq, rs, done);
-    todos(rq, rs, done);
+function statusTodos(rq, rs, next) {
+    async.parallel([
+        status.bind(null, rq, rs),
+        todos.bind(null, rq, rs)
+    ], next);
 }
 
-//  Список пользователей
-function users (rq, rs, next) {
+app.get('/todo/', cookies, sessid, statusTodos, function (rq, rs) {
+    rs.send({ sessid: rq.sessid, status: rq.status, todos: rq.todos });
+});
+
+function users(rq, rs, next) {
     backend.users(function (err, res) {
         rq.users = res;
         next();
     });
 }
 
-//  прослойка рекламы (ни от чего не зависит)
-function ads (rq, rs, next) {
+function ads(rq, rs, next) {
     backend.ads(function (err, res) {
         rq.ads = res;
         next();
     });
 }
 
-//  robots.txt
 app.get('/robots.txt', function (rq, rs) {
-    rs.type('text');
-    rs.send([
-        'Host: ' + rq.host,
-        'User-agent: *'
-    ].join('\n'));
+    rs.send([ 'Host: ' + rq.host, 'User-agent: *' ].join('\n'));
 });
 
-//  Главная страница (список пользователей)
-app.get('/',
-      cookies, ads, users,
-//    cookiesAdsUsers,
-    sessid,
-    function (rq, rs) {
+function cookiesAdsUsers(rq, rs, next) {
+    async.parallel([
+        cookies.bind(null, rq, rs),
+        ads.bind(null, rq, rs),
+        users.bind(null, rq, rs)
+    ], next);
+}
+
+app.get('/', cookiesAdsUsers, sessid, function (rq, rs) {
     rs.send({
         sessid: rq.sessid,
         users: rq.users,
         ads: rq.ads
     });
 });
-
-//  Параллельно вызывает ads, users, cookies
-function cookiesAdsUsers (rq, rs, next) {
-
-    var remaining = 3;
-
-    function done () {
-        remaining -= 1;
-
-        if ( 0 === remaining ) {
-            next();
-        }
-    }
-
-    cookies(rq, rs, done);
-    ads(rq, rs, done);
-    users(rq, rs, done);
-}
 
 app.listen(1338);
